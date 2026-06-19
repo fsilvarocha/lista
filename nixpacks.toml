@@ -1,0 +1,9 @@
+# better-sqlite3 precisa compilar módulo nativo no Linux
+[phases.setup]
+nixPkgs = ["nodejs_20", "python3", "gcc", "gnumake"]
+
+[phases.install]
+cmds = ["npm ci"]
+
+[start]
+cmd = "npm start"

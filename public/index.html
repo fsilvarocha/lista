@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Confirmar presença — Stella Florença</title>
+  <meta name="description" content="Confirme sua presença no Jardim de Bênçãos da Stella Florença" />
+  <meta property="og:title" content="Jardim de Bênçãos — Stella Florença" />
+  <meta property="og:description" content="17 de Julho de 2026 · Espaço Play Kids" />
+  <meta property="og:image" content="/convite.png" />
+  <meta property="og:type" content="website" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-cream: #fdf6f3;
+      --bg-blush: #f5e4ec;
+      --card: #fffbf9;
+      --border: #e8b4c8;
+      --text: #4a2c3d;
+      --text-muted: #6d4f5e;
+      --green: #5a7d62;
+      --rose: #b83a6b;
+      --rose-dark: #8f2d54;
+      --rose-hover: #9e2f5a;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Source Sans 3', system-ui, sans-serif;
+      background: linear-gradient(180deg, var(--bg-cream) 0%, var(--bg-blush) 100%);
+      color: var(--text);
+      padding: 1.25rem 1rem 2rem;
+    }
+
+    .pagina {
+      width: 100%;
+      max-width: 440px;
+      margin: 0 auto;
+    }
+
+    .convite {
+      width: 100%;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(74, 44, 61, 0.12);
+      display: block;
+      margin-bottom: 1.25rem;
+    }
+
+    .card {
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 1.75rem 1.5rem;
+      box-shadow: 0 4px 24px rgba(74, 44, 61, 0.08);
+    }
+
+    .evento-tag {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: .95rem;
+      color: var(--green);
+      font-weight: 600;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      margin: 0 0 .35rem;
+    }
+
+    h1 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--rose-dark);
+      margin: 0 0 .5rem;
+      line-height: 1.2;
+    }
+
+    .subtitulo {
+      margin: 0 0 1.5rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+      font-size: 1rem;
+    }
+
+    .detalhes {
+      display: grid;
+      gap: .5rem;
+      margin-bottom: 1.5rem;
+      padding: .85rem 1rem;
+      background: #faf3f6;
+      border-radius: 10px;
+      border: 1px solid #f0d4e0;
+      font-size: .92rem;
+      color: var(--text);
+    }
+
+    .detalhes span { color: var(--green); font-weight: 600; }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: .45rem;
+      color: var(--text);
+      font-size: .92rem;
+    }
+
+    input {
+      width: 100%;
+      padding: .8rem 1rem;
+      border: 2px solid #e8cdd8;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-family: inherit;
+      color: var(--text);
+      background: #fff;
+      margin-bottom: 1rem;
+    }
+
+    input::placeholder { color: #a08090; }
+    input:focus { outline: none; border-color: var(--rose); }
+    input:read-only { background: #faf3f6; color: var(--text); }
+
+    button {
+      width: 100%;
+      padding: .95rem;
+      border: none;
+      border-radius: 10px;
+      background: var(--rose);
+      color: #fff;
+      font-size: 1.05rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      letter-spacing: .02em;
+      transition: background .2s;
+    }
+
+    button:hover { background: var(--rose-hover); }
+    button:disabled { opacity: .55; cursor: not-allowed; }
+
+    .msg {
+      margin-top: 1rem;
+      padding: .85rem 1rem;
+      border-radius: 10px;
+      display: none;
+      line-height: 1.45;
+      font-size: .95rem;
+    }
+
+    .msg.ok {
+      display: block;
+      background: #e8f3ea;
+      color: #2e5c34;
+      border: 1px solid #b8d4be;
+    }
+
+    .msg.erro {
+      display: block;
+      background: #fde8ec;
+      color: #8b2942;
+      border: 1px solid #f0b8c8;
+    }
+
+    .hidden { display: none; }
+
+    .rodape {
+      text-align: center;
+      margin-top: 1.25rem;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <div class="pagina">
+    <img class="convite" src="/convite.png" alt="Convite — Jardim de Bênçãos da Stella Florença" width="440" />
+
+    <main class="card">
+      <p class="evento-tag" id="eventoTag">Jardim de Bênçãos</p>
+      <h1 id="titulo">Confirmar presença</h1>
+      <p class="subtitulo" id="subtitulo">Digite seu nome completo ou telefone exatamente como está no convite.</p>
+
+      <div class="detalhes" id="detalhes">
+        <div><span>Data:</span> <span id="evtData">17 de Julho de 2026</span></div>
+        <div><span>Horário:</span> <span id="evtHora">19:00</span></div>
+        <div><span>Local:</span> <span id="evtLocal">Espaço Play Kids</span></div>
+      </div>
+
+      <form id="form">
+        <label for="busca">Nome ou telefone</label>
+        <input id="busca" name="busca" type="text" placeholder="Ex: Maria Silva ou 11999998888" required autocomplete="name" />
+        <button type="submit" id="btn">Confirmar presença</button>
+      </form>
+
+      <div id="msg" class="msg" role="status"></div>
+    </main>
+
+    <p class="rodape">Será um prazer contar com a sua presença!</p>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    const token = params.get('t');
+
+    const form = document.getElementById('form');
+    const msg = document.getElementById('msg');
+    const btn = document.getElementById('btn');
+    const buscaInput = document.getElementById('busca');
+    const titulo = document.getElementById('titulo');
+    const subtitulo = document.getElementById('subtitulo');
+
+    fetch('/evento.json')
+      .then((r) => r.json())
+      .then((evt) => {
+        document.getElementById('eventoTag').textContent = evt.titulo;
+        document.getElementById('evtData').textContent = evt.data;
+        document.getElementById('evtHora').textContent = evt.hora;
+        document.getElementById('evtLocal').textContent = evt.local;
+        document.title = `Confirmar presença — ${evt.aniversariante}`;
+      })
+      .catch(() => {});
+
+    async function confirmar(corpo) {
+      msg.className = 'msg';
+      msg.textContent = '';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch('/api/confirmar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(corpo),
+        });
+        const data = await res.json();
+        msg.textContent = data.mensagem;
+        msg.className = 'msg ' + (data.ok ? 'ok' : 'erro');
+        if (data.ok) btn.disabled = true;
+        else btn.disabled = false;
+      } catch {
+        msg.textContent = 'Erro de conexão. Tente novamente.';
+        msg.className = 'msg erro';
+        btn.disabled = false;
+      }
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (token) {
+        await confirmar({ token });
+      } else {
+        await confirmar({ busca: buscaInput.value });
+      }
+    });
+
+    async function carregarPorLink() {
+      titulo.textContent = 'Carregando...';
+      subtitulo.classList.add('hidden');
+      form.classList.add('hidden');
+
+      try {
+        const res = await fetch('/api/convidado/' + encodeURIComponent(token));
+        const data = await res.json();
+
+        if (!data.ok) {
+          titulo.textContent = 'Link inválido';
+          subtitulo.textContent = data.mensagem || 'Este link não é válido. Peça um novo ao organizador.';
+          subtitulo.classList.remove('hidden');
+          return;
+        }
+
+        titulo.textContent = `Olá, ${data.nome}!`;
+        subtitulo.textContent = 'Clique no botão abaixo para confirmar sua presença no Jardim de Bênçãos da Stella.';
+        subtitulo.classList.remove('hidden');
+        form.classList.remove('hidden');
+
+        buscaInput.value = data.nome;
+        buscaInput.readOnly = true;
+        buscaInput.removeAttribute('required');
+
+        if (data.confirmado) {
+          msg.textContent = 'Sua presença já estava confirmada. Esperamos você!';
+          msg.className = 'msg ok';
+          btn.disabled = true;
+        }
+      } catch {
+        titulo.textContent = 'Erro de conexão';
+        subtitulo.textContent = 'Não foi possível carregar seus dados. Tente novamente.';
+        subtitulo.classList.remove('hidden');
+      }
+    }
+
+    if (token) {
+      carregarPorLink();
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel — Lista de presença</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #f1f5f9;
+      color: #0f172a;
+      padding: 1.5rem;
+    }
+    .wrap { max-width: 900px; margin: 0 auto; }
+    h1 { margin: 0 0 1rem; }
+    .login, .painel { background: #fff; border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 20px rgba(0,0,0,.06); }
+    .hidden { display: none; }
+    input, select, button {
+      font: inherit;
+      padding: .6rem .8rem;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+    }
+    button { background: #2563eb; color: #fff; border: none; cursor: pointer; }
+    button.sec { background: #64748b; }
+    button.danger { background: #dc2626; }
+    .row { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 1rem; align-items: end; }
+    .row label { display: block; font-size: .85rem; font-weight: 600; margin-bottom: .25rem; }
+    .field { flex: 1; min-width: 140px; }
+    .stats { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .stat { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: .75rem 1rem; min-width: 120px; }
+    .stat strong { display: block; font-size: 1.4rem; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: .65rem .5rem; border-bottom: 1px solid #e2e8f0; }
+    .badge { padding: .2rem .55rem; border-radius: 999px; font-size: .8rem; font-weight: 600; }
+    .badge.ok { background: #dcfce7; color: #166534; }
+    .badge.no { background: #fef3c7; color: #92400e; }
+    .erro { color: #dc2626; margin-top: .5rem; }
+    .link-btn { font-size: .8rem; padding: .35rem .6rem; white-space: nowrap; }
+    .acoes { display: flex; gap: .35rem; flex-wrap: wrap; }
+    .email-btn { background: #b83a6b; }
+  </style>
+  <script src="/email-template.js"></script>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Lista de presença</h1>
+
+    <section id="login" class="login">
+      <p>Digite a senha de administrador para ver a lista.</p>
+      <div class="row">
+        <div class="field">
+          <label for="senha">Senha</label>
+          <input id="senha" type="password" placeholder="Senha admin" />
+        </div>
+        <button type="button" id="btnEntrar">Entrar</button>
+      </div>
+      <p id="loginErro" class="erro hidden"></p>
+    </section>
+
+    <section id="painel" class="painel hidden">
+      <div class="stats">
+        <div class="stat"><span>Total</span><strong id="statTotal">0</strong></div>
+        <div class="stat"><span>Confirmados</span><strong id="statOk">0</strong></div>
+        <div class="stat"><span>Pendentes</span><strong id="statPend">0</strong></div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="filtro">Filtrar</label>
+          <select id="filtro">
+            <option value="todos">Todos</option>
+            <option value="confirmados">Confirmados</option>
+            <option value="pendentes">Pendentes</option>
+          </select>
+        </div>
+        <button type="button" class="sec" id="btnAtualizar">Atualizar</button>
+        <button type="button" class="sec" id="btnExportar">Exportar links (CSV)</button>
+      </div>
+
+      <h2>Adicionar convidado</h2>
+      <div class="row">
+        <div class="field">
+          <label for="novoNome">Nome</label>
+          <input id="novoNome" placeholder="Nome completo" />
+        </div>
+        <div class="field">
+          <label for="novoTel">Telefone</label>
+          <input id="novoTel" placeholder="Opcional" />
+        </div>
+        <button type="button" id="btnAdd">Adicionar</button>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Telefone</th>
+            <th>Status</th>
+            <th>Confirmado em</th>
+            <th>Link</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="lista"></tbody>
+      </table>
+    </section>
+  </div>
+
+  <script>
+    let senha = '';
+    let convidados = [];
+    let evento = {};
+
+    const baseUrl = location.origin;
+    const login = document.getElementById('login');
+    const painel = document.getElementById('painel');
+    const loginErro = document.getElementById('loginErro');
+    const lista = document.getElementById('lista');
+
+    function formatarData(iso) {
+      if (!iso) return '—';
+      return new Date(iso).toLocaleString('pt-BR');
+    }
+
+    function copiar(texto, btn) {
+      navigator.clipboard.writeText(texto).then(() => {
+        const original = btn.textContent;
+        btn.textContent = 'Copiado!';
+        setTimeout(() => { btn.textContent = original; }, 1500);
+      });
+    }
+
+    async function copiarEmail(convidado, btn) {
+      const html = montarEmailHtml(convidado, baseUrl, evento);
+      const texto = montarEmailTexto(convidado, evento);
+      const original = btn.textContent;
+
+      try {
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            'text/html': new Blob([html], { type: 'text/html' }),
+            'text/plain': new Blob([texto], { type: 'text/plain' }),
+          }),
+        ]);
+        btn.textContent = 'E-mail copiado!';
+      } catch {
+        await navigator.clipboard.writeText(texto);
+        btn.textContent = 'Texto copiado!';
+      }
+
+      setTimeout(() => { btn.textContent = original; }, 2000);
+    }
+
+    function renderizar() {
+      const filtro = document.getElementById('filtro').value;
+      const filtrados = convidados.filter((c) => {
+        if (filtro === 'confirmados') return c.confirmado;
+        if (filtro === 'pendentes') return !c.confirmado;
+        return true;
+      });
+
+      lista.innerHTML = filtrados.map((c) => `
+        <tr>
+          <td>${c.nome}</td>
+          <td>${c.telefone || '—'}</td>
+          <td><span class="badge ${c.confirmado ? 'ok' : 'no'}">${c.confirmado ? 'Confirmado' : 'Pendente'}</span></td>
+          <td>${formatarData(c.confirmado_em)}</td>
+          <td>
+            <div class="acoes">
+              <button type="button" class="sec link-btn" data-link="${c.link}">Link</button>
+              <button type="button" class="email-btn link-btn" data-email="${c.id}">E-mail</button>
+            </div>
+          </td>
+          <td class="acoes"><button class="danger" data-id="${c.id}">Remover</button></td>
+        </tr>
+      `).join('');
+
+      lista.querySelectorAll('button[data-link]').forEach((btn) => {
+        btn.addEventListener('click', () => copiar(btn.dataset.link, btn));
+      });
+
+      lista.querySelectorAll('button[data-email]').forEach((btn) => {
+        const c = convidados.find((x) => String(x.id) === btn.dataset.email);
+        if (c) btn.addEventListener('click', () => copiarEmail(c, btn));
+      });
+
+      lista.querySelectorAll('button[data-id]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          if (!confirm('Remover este convidado?')) return;
+          await fetch('/api/convidados/' + btn.dataset.id, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ senha }),
+          });
+          carregar();
+        });
+      });
+    }
+
+    async function carregar() {
+      const res = await fetch('/api/convidados?senha=' + encodeURIComponent(senha));
+      const data = await res.json();
+      if (!data.ok) {
+        loginErro.textContent = data.mensagem;
+        loginErro.classList.remove('hidden');
+        painel.classList.add('hidden');
+        return;
+      }
+      login.classList.add('hidden');
+      painel.classList.remove('hidden');
+      convidados = data.convidados;
+      document.getElementById('statTotal').textContent = data.resumo.total;
+      document.getElementById('statOk').textContent = data.resumo.confirmados;
+      document.getElementById('statPend').textContent = data.resumo.pendentes;
+      renderizar();
+    }
+
+    document.getElementById('btnEntrar').addEventListener('click', () => {
+      senha = document.getElementById('senha').value;
+      loginErro.classList.add('hidden');
+      carregar();
+    });
+
+    fetch('/evento.json').then((r) => r.json()).then((e) => { evento = e; }).catch(() => {});
+
+    document.getElementById('btnAtualizar').addEventListener('click', carregar);
+    document.getElementById('filtro').addEventListener('change', renderizar);
+
+    document.getElementById('btnExportar').addEventListener('click', () => {
+      const linhas = ['nome,link'];
+      for (const c of convidados) {
+        linhas.push(`"${c.nome.replace(/"/g, '""')}","${c.link}"`);
+      }
+      const blob = new Blob([linhas.join('\n')], { type: 'text/csv;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'links-convidados.csv';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
+
+    document.getElementById('btnAdd').addEventListener('click', async () => {
+      const nome = document.getElementById('novoNome').value;
+      const telefone = document.getElementById('novoTel').value;
+      await fetch('/api/convidados', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ senha, nome, telefone }),
+      });
+      document.getElementById('novoNome').value = '';
+      document.getElementById('novoTel').value = '';
+      carregar();
+    });
+  </script>
+</body>
+</html>
