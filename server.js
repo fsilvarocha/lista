@@ -449,6 +449,10 @@ app.delete('/api/grupos/:id', (req, res) => {
   return res.json({ ok: true });
 });
 
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 app.listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);
   console.log(`Painel admin: http://localhost:${PORT}/admin.html`);
