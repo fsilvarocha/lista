@@ -13,34 +13,41 @@
       color: #0f172a;
       padding: 1.5rem;
     }
-    .wrap { max-width: 900px; margin: 0 auto; }
+    .wrap { max-width: 1100px; margin: 0 auto; }
     h1 { margin: 0 0 1rem; }
-    .login, .painel { background: #fff; border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 20px rgba(0,0,0,.06); }
+    h2 { margin: 1.5rem 0 .75rem; font-size: 1.1rem; }
+    .login, .painel, .bloco { background: #fff; border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 20px rgba(0,0,0,.06); margin-bottom: 1rem; }
     .hidden { display: none; }
-    input, select, button {
+    input, select, button, textarea {
       font: inherit;
       padding: .6rem .8rem;
       border-radius: 8px;
       border: 1px solid #cbd5e1;
     }
+    textarea { width: 100%; min-height: 90px; resize: vertical; }
     button { background: #2563eb; color: #fff; border: none; cursor: pointer; }
     button.sec { background: #64748b; }
     button.danger { background: #dc2626; }
+    button.warn { background: #d97706; }
+    button.email-btn { background: #b83a6b; }
     .row { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 1rem; align-items: end; }
     .row label { display: block; font-size: .85rem; font-weight: 600; margin-bottom: .25rem; }
     .field { flex: 1; min-width: 140px; }
+    .field-full { flex: 1 1 100%; }
     .stats { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
     .stat { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: .75rem 1rem; min-width: 120px; }
     .stat strong { display: block; font-size: 1.4rem; }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { text-align: left; padding: .65rem .5rem; border-bottom: 1px solid #e2e8f0; }
-    .badge { padding: .2rem .55rem; border-radius: 999px; font-size: .8rem; font-weight: 600; }
+    table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+    th, td { text-align: left; padding: .65rem .5rem; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+    .badge { padding: .2rem .55rem; border-radius: 999px; font-size: .78rem; font-weight: 600; white-space: nowrap; }
     .badge.ok { background: #dcfce7; color: #166534; }
     .badge.no { background: #fef3c7; color: #92400e; }
+    .badge.grupo { background: #ede9fe; color: #5b21b6; }
     .erro { color: #dc2626; margin-top: .5rem; }
-    .link-btn { font-size: .8rem; padding: .35rem .6rem; white-space: nowrap; }
+    .hint { font-size: .85rem; color: #64748b; margin: -.5rem 0 1rem; }
+    .link-btn { font-size: .78rem; padding: .35rem .55rem; white-space: nowrap; }
     .acoes { display: flex; gap: .35rem; flex-wrap: wrap; }
-    .email-btn { background: #b83a6b; }
+    .membros-cell { font-size: .85rem; color: #475569; max-width: 220px; }
   </style>
   <script src="/email-template.js"></script>
 </head>
@@ -69,28 +76,65 @@
 
       <div class="row">
         <div class="field">
-          <label for="filtro">Filtrar</label>
+          <label for="filtro">Filtrar convidados</label>
           <select id="filtro">
             <option value="todos">Todos</option>
             <option value="confirmados">Confirmados</option>
             <option value="pendentes">Pendentes</option>
+            <option value="avulsos">Somente avulsos</option>
           </select>
         </div>
         <button type="button" class="sec" id="btnAtualizar">Atualizar</button>
         <button type="button" class="sec" id="btnExportar">Exportar links (CSV)</button>
       </div>
 
-      <h2>Adicionar convidado</h2>
-      <div class="row">
-        <div class="field">
-          <label for="novoNome">Nome</label>
-          <input id="novoNome" placeholder="Nome completo" />
+      <div class="bloco">
+        <h2>Criar grupo</h2>
+        <p class="hint">Um link confirma a presença de todas as pessoas do grupo. Uma pessoa por linha — opcionalmente <code>Nome, telefone</code>.</p>
+        <div class="row">
+          <div class="field">
+            <label for="grupoNome">Nome do grupo</label>
+            <input id="grupoNome" placeholder="Ex: Família Silva" />
+          </div>
         </div>
-        <div class="field">
-          <label for="novoTel">Telefone</label>
-          <input id="novoTel" placeholder="Opcional" />
+        <div class="row">
+          <div class="field field-full">
+            <label for="grupoMembros">Pessoas do grupo</label>
+            <textarea id="grupoMembros" placeholder="Maria Silva, 11999998888&#10;João Silva&#10;Pedro Silva"></textarea>
+          </div>
         </div>
-        <button type="button" id="btnAdd">Adicionar</button>
+        <button type="button" id="btnCriarGrupo">Criar grupo</button>
+      </div>
+
+      <h2>Grupos</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Grupo</th>
+            <th>Membros</th>
+            <th>Status</th>
+            <th>Confirmado em</th>
+            <th>Enviar</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="listaGrupos"></tbody>
+      </table>
+
+      <h2>Convidados</h2>
+      <div class="bloco">
+        <h2 style="margin-top:0">Adicionar convidado avulso</h2>
+        <div class="row">
+          <div class="field">
+            <label for="novoNome">Nome</label>
+            <input id="novoNome" placeholder="Nome completo" />
+          </div>
+          <div class="field">
+            <label for="novoTel">Telefone</label>
+            <input id="novoTel" placeholder="Opcional" />
+          </div>
+          <button type="button" id="btnAdd">Adicionar</button>
+        </div>
       </div>
 
       <table>
@@ -98,10 +142,11 @@
           <tr>
             <th>Nome</th>
             <th>Telefone</th>
+            <th>Grupo</th>
             <th>Status</th>
             <th>Confirmado em</th>
-            <th>Link</th>
-            <th></th>
+            <th>Enviar</th>
+            <th>Ações</th>
           </tr>
         </thead>
         <tbody id="lista"></tbody>
@@ -112,13 +157,19 @@
   <script>
     let senha = '';
     let convidados = [];
+    let grupos = [];
     let evento = {};
-
     const baseUrl = location.origin;
+
     const login = document.getElementById('login');
     const painel = document.getElementById('painel');
     const loginErro = document.getElementById('loginErro');
     const lista = document.getElementById('lista');
+    const listaGrupos = document.getElementById('listaGrupos');
+
+    function esc(s) {
+      return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+    }
 
     function formatarData(iso) {
       if (!iso) return '—';
@@ -133,9 +184,9 @@
       });
     }
 
-    async function copiarEmail(convidado, btn) {
-      const html = montarEmailHtml(convidado, baseUrl, evento);
-      const texto = montarEmailTexto(convidado, evento);
+    async function copiarEmail(item, btn) {
+      const html = montarEmailHtml(item, baseUrl, evento);
+      const texto = montarEmailTexto(item, evento);
       const original = btn.textContent;
 
       try {
@@ -154,40 +205,126 @@
       setTimeout(() => { btn.textContent = original; }, 2000);
     }
 
-    function renderizar() {
+    function parseMembros(texto) {
+      return texto.split(/\r?\n/).map((linha) => {
+        const [nome, telefone] = linha.split(',').map((s) => s.trim());
+        return nome ? { nome, telefone: telefone || null } : null;
+      }).filter(Boolean);
+    }
+
+    function renderizarGrupos() {
+      if (!grupos.length) {
+        listaGrupos.innerHTML = '<tr><td colspan="6" style="color:#64748b">Nenhum grupo criado.</td></tr>';
+        return;
+      }
+
+      listaGrupos.innerHTML = grupos.map((g) => `
+        <tr>
+          <td><strong>${esc(g.nome)}</strong></td>
+          <td class="membros-cell">${g.membros.map((m) => esc(m.nome)).join('<br>')}</td>
+          <td><span class="badge ${g.confirmado ? 'ok' : 'no'}">${g.confirmado ? 'Confirmado' : 'Pendente'}</span></td>
+          <td>${formatarData(g.confirmado_em)}</td>
+          <td>
+            <div class="acoes">
+              <button type="button" class="sec link-btn" data-grupo-link="${esc(g.link)}">Link</button>
+              <button type="button" class="email-btn link-btn" data-grupo-email="${g.id}">E-mail</button>
+            </div>
+          </td>
+          <td>
+            <div class="acoes">
+              ${g.confirmado ? `<button type="button" class="warn link-btn" data-desconfirmar-grupo="${g.id}">Desconfirmar</button>` : ''}
+              <button type="button" class="danger link-btn" data-remover-grupo="${g.id}">Excluir</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+
+      listaGrupos.querySelectorAll('[data-grupo-link]').forEach((btn) => {
+        btn.addEventListener('click', () => copiar(btn.dataset.grupoLink, btn));
+      });
+      listaGrupos.querySelectorAll('[data-grupo-email]').forEach((btn) => {
+        const g = grupos.find((x) => String(x.id) === btn.dataset.grupoEmail);
+        if (g) btn.addEventListener('click', () => copiarEmail({ ...g, tipo: 'grupo' }, btn));
+      });
+      listaGrupos.querySelectorAll('[data-desconfirmar-grupo]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          if (!confirm('Remover a confirmação de todo o grupo?')) return;
+          await fetch('/api/grupos/' + btn.dataset.desconfirmarGrupo + '/desconfirmar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ senha }),
+          });
+          carregar();
+        });
+      });
+      listaGrupos.querySelectorAll('[data-remover-grupo]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          if (!confirm('Excluir o grupo e todos os membros?')) return;
+          await fetch('/api/grupos/' + btn.dataset.removerGrupo, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ senha }),
+          });
+          carregar();
+        });
+      });
+    }
+
+    function renderizarConvidados() {
       const filtro = document.getElementById('filtro').value;
       const filtrados = convidados.filter((c) => {
         if (filtro === 'confirmados') return c.confirmado;
         if (filtro === 'pendentes') return !c.confirmado;
+        if (filtro === 'avulsos') return !c.grupo_id;
         return true;
       });
 
       lista.innerHTML = filtrados.map((c) => `
         <tr>
-          <td>${c.nome}</td>
-          <td>${c.telefone || '—'}</td>
+          <td>${esc(c.nome)}</td>
+          <td>${esc(c.telefone) || '—'}</td>
+          <td>${c.grupo_nome ? `<span class="badge grupo">${esc(c.grupo_nome)}</span>` : '—'}</td>
           <td><span class="badge ${c.confirmado ? 'ok' : 'no'}">${c.confirmado ? 'Confirmado' : 'Pendente'}</span></td>
           <td>${formatarData(c.confirmado_em)}</td>
           <td>
             <div class="acoes">
-              <button type="button" class="sec link-btn" data-link="${c.link}">Link</button>
-              <button type="button" class="email-btn link-btn" data-email="${c.id}">E-mail</button>
+              ${c.grupo_id ? '' : `<button type="button" class="sec link-btn" data-link="${esc(c.link)}">Link</button>
+              <button type="button" class="email-btn link-btn" data-email="${c.id}">E-mail</button>`}
+              ${c.grupo_id ? '<span style="font-size:.78rem;color:#64748b">Use o link do grupo</span>' : ''}
             </div>
           </td>
-          <td class="acoes"><button class="danger" data-id="${c.id}">Remover</button></td>
+          <td>
+            <div class="acoes">
+              ${c.confirmado ? `<button type="button" class="warn link-btn" data-desconfirmar="${c.id}">Desconfirmar</button>` : ''}
+              <button type="button" class="danger link-btn" data-id="${c.id}">Remover</button>
+            </div>
+          </td>
         </tr>
       `).join('');
 
-      lista.querySelectorAll('button[data-link]').forEach((btn) => {
+      lista.querySelectorAll('[data-link]').forEach((btn) => {
         btn.addEventListener('click', () => copiar(btn.dataset.link, btn));
       });
-
-      lista.querySelectorAll('button[data-email]').forEach((btn) => {
+      lista.querySelectorAll('[data-email]').forEach((btn) => {
         const c = convidados.find((x) => String(x.id) === btn.dataset.email);
         if (c) btn.addEventListener('click', () => copiarEmail(c, btn));
       });
-
-      lista.querySelectorAll('button[data-id]').forEach((btn) => {
+      lista.querySelectorAll('[data-desconfirmar]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const c = convidados.find((x) => String(x.id) === btn.dataset.desconfirmar);
+          const msg = c && c.grupo_id
+            ? 'Este convidado faz parte de um grupo. A confirmação de todo o grupo será removida. Continuar?'
+            : 'Remover a confirmação deste convidado?';
+          if (!confirm(msg)) return;
+          await fetch('/api/convidados/' + btn.dataset.desconfirmar + '/desconfirmar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ senha }),
+          });
+          carregar();
+        });
+      });
+      lista.querySelectorAll('[data-id]').forEach((btn) => {
         btn.addEventListener('click', async () => {
           if (!confirm('Remover este convidado?')) return;
           await fetch('/api/convidados/' + btn.dataset.id, {
@@ -198,6 +335,11 @@
           carregar();
         });
       });
+    }
+
+    function renderizar() {
+      renderizarGrupos();
+      renderizarConvidados();
     }
 
     async function carregar() {
@@ -212,6 +354,7 @@
       login.classList.add('hidden');
       painel.classList.remove('hidden');
       convidados = data.convidados;
+      grupos = data.grupos || [];
       document.getElementById('statTotal').textContent = data.resumo.total;
       document.getElementById('statOk').textContent = data.resumo.confirmados;
       document.getElementById('statPend').textContent = data.resumo.pendentes;
@@ -230,9 +373,16 @@
     document.getElementById('filtro').addEventListener('change', renderizar);
 
     document.getElementById('btnExportar').addEventListener('click', () => {
-      const linhas = ['nome,link'];
+      const linhas = ['tipo,nome,link'];
+      const linksGrupo = new Set();
+      for (const g of grupos) {
+        linhas.push(`"grupo","${g.nome.replace(/"/g, '""')}","${g.link}"`);
+        linksGrupo.add(g.id);
+      }
       for (const c of convidados) {
-        linhas.push(`"${c.nome.replace(/"/g, '""')}","${c.link}"`);
+        if (!c.grupo_id) {
+          linhas.push(`"individual","${c.nome.replace(/"/g, '""')}","${c.link}"`);
+        }
       }
       const blob = new Blob([linhas.join('\n')], { type: 'text/csv;charset=utf-8' });
       const a = document.createElement('a');
@@ -240,6 +390,24 @@
       a.download = 'links-convidados.csv';
       a.click();
       URL.revokeObjectURL(a.href);
+    });
+
+    document.getElementById('btnCriarGrupo').addEventListener('click', async () => {
+      const nome = document.getElementById('grupoNome').value;
+      const membros = parseMembros(document.getElementById('grupoMembros').value);
+      const res = await fetch('/api/grupos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ senha, nome, membros }),
+      });
+      const data = await res.json();
+      if (!data.ok) {
+        alert(data.mensagem || 'Erro ao criar grupo.');
+        return;
+      }
+      document.getElementById('grupoNome').value = '';
+      document.getElementById('grupoMembros').value = '';
+      carregar();
     });
 
     document.getElementById('btnAdd').addEventListener('click', async () => {

@@ -166,6 +166,26 @@
 
     .hidden { display: none; }
 
+    .membros-lista {
+      margin: 0 0 1.25rem;
+      padding: .85rem 1rem;
+      background: #faf3f6;
+      border-radius: 10px;
+      border: 1px solid #f0d4e0;
+      list-style: none;
+    }
+
+    .membros-lista li {
+      padding: .25rem 0;
+      color: var(--text);
+      font-size: .95rem;
+    }
+
+    .membros-lista li::before {
+      content: "✿ ";
+      color: var(--green);
+    }
+
     .rodape {
       text-align: center;
       margin-top: 1.25rem;
@@ -191,9 +211,12 @@
         <div><span>Local:</span> <span id="evtLocal">Espaço Play Kids</span></div>
       </div>
 
-      <form id="form">
-        <label for="busca">Nome ou telefone</label>
-        <input id="busca" name="busca" type="text" placeholder="Ex: Maria Silva ou 11999998888" required autocomplete="name" />
+      <form id="form" novalidate>
+        <div id="campoBusca">
+          <label for="busca">Nome ou telefone</label>
+          <input id="busca" name="busca" type="text" placeholder="Ex: Maria Silva ou 11999998888" required autocomplete="name" />
+        </div>
+        <ul id="membrosLista" class="membros-lista hidden"></ul>
         <button type="submit" id="btn">Confirmar presença</button>
       </form>
 
@@ -206,13 +229,18 @@
   <script>
     const params = new URLSearchParams(location.search);
     const token = params.get('t');
+    const grupoToken = params.get('g');
 
     const form = document.getElementById('form');
     const msg = document.getElementById('msg');
     const btn = document.getElementById('btn');
     const buscaInput = document.getElementById('busca');
+    const campoBusca = document.getElementById('campoBusca');
+    const membrosLista = document.getElementById('membrosLista');
     const titulo = document.getElementById('titulo');
     const subtitulo = document.getElementById('subtitulo');
+
+    let modoGrupo = null;
 
     fetch('/evento.json')
       .then((r) => r.json())
@@ -229,6 +257,8 @@
       msg.className = 'msg';
       msg.textContent = '';
       btn.disabled = true;
+      const textoOriginal = btn.textContent;
+      btn.textContent = 'Confirmando...';
 
       try {
         const res = await fetch('/api/confirmar', {
@@ -237,25 +267,74 @@
           body: JSON.stringify(corpo),
         });
         const data = await res.json();
-        msg.textContent = data.mensagem;
+        msg.textContent = data.mensagem || 'Não foi possível confirmar. Tente novamente.';
         msg.className = 'msg ' + (data.ok ? 'ok' : 'erro');
+        btn.textContent = data.ok ? textoOriginal : 'Confirmar presença de todos';
         if (data.ok) btn.disabled = true;
         else btn.disabled = false;
       } catch {
         msg.textContent = 'Erro de conexão. Tente novamente.';
         msg.className = 'msg erro';
+        btn.textContent = textoOriginal;
         btn.disabled = false;
       }
     }
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      if (token) {
+      if (modoGrupo) {
+        await confirmar({ grupo: modoGrupo });
+      } else if (token) {
         await confirmar({ token });
       } else {
         await confirmar({ busca: buscaInput.value });
       }
     });
+
+    function exibirGrupo(data) {
+      modoGrupo = grupoToken || data.grupoToken;
+      campoBusca.classList.add('hidden');
+      buscaInput.removeAttribute('required');
+      buscaInput.disabled = true;
+      buscaInput.value = '';
+      membrosLista.classList.remove('hidden');
+      membrosLista.innerHTML = data.membros.map((n) => `<li>${n}</li>`).join('');
+      titulo.textContent = grupoToken ? data.nome : `Olá, ${data.nome}!`;
+      subtitulo.textContent = 'Confirme a presença de todas as pessoas abaixo com um clique:';
+      btn.textContent = data.membros.length > 1 ? 'Confirmar presença de todos' : 'Confirmar presença';
+      form.classList.remove('hidden');
+
+      if (data.confirmado) {
+        msg.textContent = 'A presença deste grupo já estava confirmada. Esperamos vocês!';
+        msg.className = 'msg ok';
+        btn.disabled = true;
+      }
+    }
+
+    async function carregarGrupoPorLink() {
+      titulo.textContent = 'Carregando...';
+      subtitulo.classList.add('hidden');
+      form.classList.add('hidden');
+
+      try {
+        const res = await fetch('/api/grupo/' + encodeURIComponent(grupoToken));
+        const data = await res.json();
+
+        if (!data.ok) {
+          titulo.textContent = 'Link inválido';
+          subtitulo.textContent = data.mensagem || 'Este link não é válido. Peça um novo ao organizador.';
+          subtitulo.classList.remove('hidden');
+          return;
+        }
+
+        subtitulo.classList.remove('hidden');
+        exibirGrupo({ ...data, nome: data.nome });
+      } catch {
+        titulo.textContent = 'Erro de conexão';
+        subtitulo.textContent = 'Não foi possível carregar os dados. Tente novamente.';
+        subtitulo.classList.remove('hidden');
+      }
+    }
 
     async function carregarPorLink() {
       titulo.textContent = 'Carregando...';
@@ -270,6 +349,12 @@
           titulo.textContent = 'Link inválido';
           subtitulo.textContent = data.mensagem || 'Este link não é válido. Peça um novo ao organizador.';
           subtitulo.classList.remove('hidden');
+          return;
+        }
+
+        if (data.tipo === 'grupo') {
+          subtitulo.classList.remove('hidden');
+          exibirGrupo(data);
           return;
         }
 
@@ -294,7 +379,9 @@
       }
     }
 
-    if (token) {
+    if (grupoToken) {
+      carregarGrupoPorLink();
+    } else if (token) {
       carregarPorLink();
     }
   </script>
