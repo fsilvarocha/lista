@@ -6,7 +6,7 @@
   <title>Confirmar presença — Stella Florença</title>
   <meta name="description" content="Confirme sua presença no Jardim de Bênçãos da Stella Florença" />
   <meta property="og:title" content="Jardim de Bênçãos — Stella Florença" />
-  <meta property="og:description" content="17 de Julho de 2026 · Espaço Play Kids" />
+  <meta property="og:description" content="17 de Julho de 2026 · 20:00 · Espaço Play Kids" />
   <meta property="og:image" content="/convite.png" />
   <meta property="og:type" content="website" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -207,8 +207,10 @@
 
       <div class="detalhes" id="detalhes">
         <div><span>Data:</span> <span id="evtData">17 de Julho de 2026</span></div>
-        <div><span>Horário:</span> <span id="evtHora">19:00</span></div>
-        <div><span>Local:</span> <span id="evtLocal">Espaço Play Kids</span></div>
+        <div><span>Horário:</span> <span id="evtHora">20:00</span></div>
+        <div><span>Local:</span> <span id="evtLocal">Espaço Play Kids | Vieira Guimarães</span></div>
+        <div id="evtEndereco" class="hidden"><span>Endereço:</span> <span id="evtEnderecoTexto"></span></div>
+        <div id="evtReferencia" class="hidden"><span>Referência:</span> <span id="evtReferenciaTexto"></span></div>
       </div>
 
       <form id="form" novalidate>
@@ -249,6 +251,14 @@
         document.getElementById('evtData').textContent = evt.data;
         document.getElementById('evtHora').textContent = evt.hora;
         document.getElementById('evtLocal').textContent = evt.local;
+        if (evt.endereco) {
+          document.getElementById('evtEnderecoTexto').textContent = evt.endereco;
+          document.getElementById('evtEndereco').classList.remove('hidden');
+        }
+        if (evt.referencia) {
+          document.getElementById('evtReferenciaTexto').textContent = evt.referencia;
+          document.getElementById('evtReferencia').classList.remove('hidden');
+        }
         document.title = `Confirmar presença — ${evt.aniversariante}`;
       })
       .catch(() => {});

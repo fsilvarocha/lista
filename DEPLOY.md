@@ -55,10 +55,20 @@ Sem volume, a lista de convidados some a cada redeploy.
 2. **Mount Path:** `/app/data`
 3. Salvar e redeployar
 
-### 6. Domínio público
+### 6. Domínio público e porta
 
-1. **Settings** → **Networking** → **Generate Domain**
-2. Use essa URL como `BASE_URL`
+1. **Settings** → **Networking** → **Generate Domain** (se ainda não tiver)
+2. Em **Public Networking**, confira se a porta aponta para a variável **`PORT`** do Railway (geralmente `8080`)
+3. O deploy precisa ficar **Active / Success** (não *Failed* ou *Crashed*)
+
+Use a URL gerada como `BASE_URL`.
+
+### Site retorna 404?
+
+1. **Networking** → verifique se o domínio está no **mesmo serviço** que roda `node server.js`
+2. **Deployments** → o último deploy está verde? Se o health check falhar, a URL pública pode dar 404
+3. Confirme que a pasta `public/` foi enviada ao GitHub (`index.html` precisa estar no repositório)
+4. Após atualizar o código (bind `0.0.0.0` + rota `/health`), faça **Redeploy**
 
 ### 7. Importar convidados
 

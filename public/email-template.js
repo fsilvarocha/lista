@@ -31,7 +31,9 @@ function montarEmailIndividualHtml(convidado, baseUrl, evento) {
             </p>
             <p style="margin:0 0 8px;font-size:15px;color:#4a2c3d;"><strong style="color:#5a7d62;">Data:</strong> ${evento.data}</p>
             <p style="margin:0 0 8px;font-size:15px;color:#4a2c3d;"><strong style="color:#5a7d62;">Horário:</strong> ${evento.hora}</p>
-            <p style="margin:0 0 24px;font-size:15px;color:#4a2c3d;"><strong style="color:#5a7d62;">Local:</strong> ${evento.local}</p>
+            <p style="margin:0 0 8px;font-size:15px;color:#4a2c3d;"><strong style="color:#5a7d62;">Local:</strong> ${evento.local}</p>
+            ${evento.endereco ? `<p style="margin:0 0 8px;font-size:15px;color:#4a2c3d;"><strong style="color:#5a7d62;">Endereço:</strong> ${evento.endereco}</p>` : ''}
+            <p style="margin:0 0 24px;font-size:15px;color:#4a2c3d;">${evento.referencia ? `<strong style="color:#5a7d62;">Referência:</strong> ${evento.referencia}` : ''}</p>
             <p style="margin:0 0 16px;font-size:16px;color:#4a2c3d;">Por favor, confirme sua presença:</p>
             <a href="${link}" style="display:inline-block;background:#b83a6b;color:#ffffff;padding:14px 28px;text-decoration:none;border-radius:8px;font-size:16px;font-weight:bold;">Confirmar presença</a>
             <p style="margin:24px 0 0;font-size:13px;color:#a08090;line-height:1.5;">
@@ -80,7 +82,9 @@ function montarEmailGrupoHtml(grupo, baseUrl, evento) {
             </p>
             <p style="margin:0 0 8px;font-size:15px;color:#4a2c3d;"><strong style="color:#5a7d62;">Data:</strong> ${evento.data}</p>
             <p style="margin:0 0 8px;font-size:15px;color:#4a2c3d;"><strong style="color:#5a7d62;">Horário:</strong> ${evento.hora}</p>
-            <p style="margin:0 0 16px;font-size:15px;color:#4a2c3d;"><strong style="color:#5a7d62;">Local:</strong> ${evento.local}</p>
+            <p style="margin:0 0 8px;font-size:15px;color:#4a2c3d;"><strong style="color:#5a7d62;">Local:</strong> ${evento.local}</p>
+            ${evento.endereco ? `<p style="margin:0 0 8px;font-size:15px;color:#4a2c3d;"><strong style="color:#5a7d62;">Endereço:</strong> ${evento.endereco}</p>` : ''}
+            ${evento.referencia ? `<p style="margin:0 0 16px;font-size:15px;color:#4a2c3d;"><strong style="color:#5a7d62;">Referência:</strong> ${evento.referencia}</p>` : '<p style="margin:0 0 16px;"></p>'}
             <p style="margin:0 0 8px;font-size:15px;color:#4a2c3d;font-weight:bold;">Pessoas neste convite:</p>
             <ul style="margin:0 0 20px;padding-left:20px;">${listaMembros}</ul>
             <p style="margin:0 0 16px;font-size:16px;color:#4a2c3d;">Um clique confirma a presença de todos:</p>
@@ -110,6 +114,7 @@ Pessoas: ${membros}
 Data: ${evento.data}
 Horário: ${evento.hora}
 Local: ${evento.local}
+${evento.endereco ? `Endereço: ${evento.endereco}\n` : ''}${evento.referencia ? `Referência: ${evento.referencia}\n` : ''}
 
 Confirme a presença de todos acessando:
 ${item.link}`;
@@ -122,6 +127,7 @@ Você está convidado(a) para o ${evento.titulo} da ${evento.aniversariante}.
 Data: ${evento.data}
 Horário: ${evento.hora}
 Local: ${evento.local}
+${evento.endereco ? `Endereço: ${evento.endereco}\n` : ''}${evento.referencia ? `Referência: ${evento.referencia}\n` : ''}
 
 Confirme sua presença acessando o link:
 ${item.link}

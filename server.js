@@ -172,6 +172,11 @@ function checarSenha(senha, res) {
 
 const app = express();
 app.use(express.json());
+
+app.get('/health', (req, res) => {
+  res.status(200).send('ok');
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/api/convidado/:token', (req, res) => {
@@ -449,8 +454,10 @@ app.delete('/api/grupos/:id', (req, res) => {
   return res.json({ ok: true });
 });
 
-app.listen(PORT, () => {
-  console.log(`Servidor rodando em http://localhost:${PORT}`);
-  console.log(`Painel admin: http://localhost:${PORT}/admin.html`);
+const HOST = process.env.HOST || '0.0.0.0';
+
+app.listen(PORT, HOST, () => {
+  console.log(`Servidor rodando em http://${HOST}:${PORT}`);
+  console.log(`Painel admin: /admin.html`);
   console.log(`Senha admin padrão: ${ADMIN_SENHA} (altere com ADMIN_SENHA=...)`);
 });
